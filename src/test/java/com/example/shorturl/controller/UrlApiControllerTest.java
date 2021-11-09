@@ -6,6 +6,7 @@ import com.example.shorturl.repository.UrlRepository;
 import com.example.shorturl.service.UrlService;
 import com.example.shorturl.url.Url;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.coyote.Request;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,8 +24,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
 
-import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
-import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
+import static org.springframework.restdocs.headers.HeaderDocumentation.*;
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.linkWithRel;
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.links;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
@@ -52,9 +52,6 @@ class UrlApiControllerTest {
 
     @Autowired
     ObjectMapper objectMapper;
-
-    @Autowired
-    MockHttpServletResponse response;
 
     @BeforeEach
     public void setUp(){
@@ -95,19 +92,56 @@ class UrlApiControllerTest {
                 ));
     }
 
-//    @Test
-//    public void responseUrl() throws Exception{
-//        String originalUrl = "https://www.naver.com";
-//        RequestUrlForm requestUrlForm = new RequestUrlForm();
-//        requestUrlForm.setUrl(originalUrl);
-//        Url url = this.urlService.saveUrl(requestUrlForm);
-//
-//        this.mockMvc.perform(get("/bit.ly/" + String.valueOf(url.getUrl()))
-//                .content(MediaTypes.HAL_JSON_VALUE)
-//                .accept(MediaType.APPLICATION_JSON))
-//                .andDo(print())
-//                .andExpect(status().isOk());
-//    }
+    @Test
+    public void responseUrl() throws Exception{
+
+        this.mockMvc.perform(get("/bit.ly/notFound"))
+                .andDo(print())
+                .andExpect(jsonPath("code").exists())
+                .andExpect(jsonPath("message").exists())
+                .andExpect(status().isNotFound())
+                .andDo(document("error-notFound",
+                        links(
+                                linkWithRel("request-url").description("request-url")
+                        ),
+                        responseFields(
+                                fieldWithPath("code").description("error code"),
+                                fieldWithPath("message").description("error message"),
+                                fieldWithPath("_links.request-url.href").description("return request url")
+                        ),
+                        responseHeaders(
+                                headerWithName(HttpHeaders.CONTENT_TYPE).description("content type header")
+                        ))
+                );
+    }
+    @Test
+    public void InvalidUrl() throws Exception{
+
+        RequestUrlForm requestUrlForm = new RequestUrlForm();
+        requestUrlForm.setUrl("www.naver.com");
+
+        mockMvc.perform(post("/bit.ly")
+                        .accept(MediaTypes.HAL_JSON_VALUE)
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(objectMapper.writeValueAsString(requestUrlForm)))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("code").exists())
+                .andExpect(jsonPath("message").exists())
+                .andDo(document("error-invalidError",
+                        links(
+                                linkWithRel("request-url").description("request-url")
+                        ),
+                        responseFields(
+                                fieldWithPath("code").description("error code"),
+                                fieldWithPath("message").description("error message"),
+                                fieldWithPath("_links.request-url.href").description("return request-url")
+                        ),
+                        responseHeaders(
+                                headerWithName(HttpHeaders.CONTENT_TYPE).description("content type header")
+                        ))
+                );
+    }
 
 
 }

@@ -25,8 +25,8 @@ public class ExControllerAdvice {
 
     @ExceptionHandler(UrlException.class)
     public ResponseEntity urlException(UrlException e){
-        log.error("[exceptionHandler]  ex", e);
-        ErrorResult errorResult = new ErrorResult("URL_NOT_FOUND", "URL을 찾을 수 없습니다.");
+        log.error("[exceptionHandler]  ex = {}", e);
+        ErrorResult errorResult = new ErrorResult("URL_NOT_FOUND", "URL을 찾지 못했습니다.");
 
         ErrorResource errorResource = new ErrorResource(errorResult);
         errorResource.add(linkTo(ExControllerAdvice.class).slash("bit.ly").withRel("request-url"));
@@ -36,7 +36,7 @@ public class ExControllerAdvice {
 
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity badRequestException(BadRequestException e){
-        log.error("[exceptionHandler]  ex", e);
+        log.error("[exceptionHandler]  ex = {}", e);
         ErrorResult errorResult = new ErrorResult("BAD_URL", "URL형식을 다시 확인해주세요");
 
         ErrorResource errorResource = new ErrorResource(errorResult);
