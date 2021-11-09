@@ -22,13 +22,12 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 @Slf4j
 public class ExControllerAdvice {
 
-    @ResponseStatus(HttpStatus.NOT_FOUND)
+
     @ExceptionHandler(UrlException.class)
     public ResponseEntity urlException(UrlException e){
         log.error("[exceptionHandler]  ex", e);
         ErrorResult errorResult = new ErrorResult("URL_NOT_FOUND", "URL을 찾을 수 없습니다.");
 
-        WebMvcLinkBuilder selfLinkBuilder = linkTo(ExControllerAdvice.class);
         ErrorResource errorResource = new ErrorResource(errorResult);
         errorResource.add(linkTo(ExControllerAdvice.class).slash("bit.ly").withRel("request-url"));
 
@@ -38,14 +37,12 @@ public class ExControllerAdvice {
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity badRequestException(BadRequestException e){
         log.error("[exceptionHandler]  ex", e);
-        ErrorResult errorResult = new ErrorResult("BAD URL", e.getMessage());
-        UrlResource urlResource = new UrlResource(new ResponseUrlForm(null, null));
+        ErrorResult errorResult = new ErrorResult("BAD_URL", "URL형식을 다시 확인해주세요");
 
-        WebMvcLinkBuilder linkBuilder = linkTo(ExControllerAdvice.class);
-        URI uri = linkBuilder.toUri();
-        urlResource.add(linkTo(ExControllerAdvice.class).withSelfRel());
+        ErrorResource errorResource = new ErrorResource(errorResult);
+        errorResource.add(linkTo(ExControllerAdvice.class).slash("bit.ly").withRel("request-url"));
 
-        return ResponseEntity.created(uri).body(errorResult);
+        return new ResponseEntity(errorResource, HttpStatus.BAD_REQUEST);
     }
 
 }

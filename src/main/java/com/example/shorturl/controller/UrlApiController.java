@@ -42,8 +42,7 @@ public class UrlApiController {
     @PostMapping()
     public ResponseEntity requestUrl(@RequestBody @Valid RequestUrlForm form, BindingResult bindingResult){
 
-        if (bindingResult.hasErrors())
-        {
+        if (bindingResult.hasErrors()) {
             throw new BadRequestException();
         }
 
