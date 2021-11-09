@@ -212,11 +212,6 @@ Last updated 2021-11-09 18:11:38 +0900
 </div>
 </div>
 
-<script>
-if (!hljs.initHighlighting.called) {
-  hljs.initHighlighting.called = true
-  ;[].slice.call(document.querySelectorAll('pre.highlight > code')).forEach(function (el) { hljs.highlightBlock(el) })
-}
-</script>
+
 </body>
 </html>
