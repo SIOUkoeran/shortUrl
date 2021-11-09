@@ -211,7 +211,7 @@ Content-Length: 247
 Last updated 2021-11-09 18:11:38 +0900
 </div>
 </div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>
+
 <script>
 if (!hljs.initHighlighting.called) {
   hljs.initHighlighting.called = true
