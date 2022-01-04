@@ -1,6 +1,7 @@
 package com.example.shorturl.service.hashUtils;
 
 import lombok.extern.slf4j.Slf4j;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import javax.crypto.BadPaddingException;
@@ -24,6 +25,8 @@ class AESTest {
         String encrypt = encryptUtil.encrypt(url);
         log.info("encrypt result = {}", encrypt);
         log.info("transform long = {}", new BigInteger(String.valueOf(encrypt), 16));
+        String encryptCopy = encryptUtil.encrypt(url);
+        Assertions.assertThat(encrypt).isEqualTo(encryptCopy);
     }
 
 }
