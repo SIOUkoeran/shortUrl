@@ -18,6 +18,7 @@ public class Url {
     @Column(unique = true)
     private String url;
 
+    @Column(unique = true)
     private String shortUrl;
 
     public Url(String url, String shortUrl) {
