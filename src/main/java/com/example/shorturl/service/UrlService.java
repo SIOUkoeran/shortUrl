@@ -8,9 +8,12 @@ import com.example.shorturl.repository.UrlRepository;
 import com.example.shorturl.service.encode.UrlEncoder;
 import com.example.shorturl.form.RequestUrlForm;
 
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -59,33 +62,26 @@ public class UrlService {
         return this.repository.findByShortUrl(url);
     }
 
-    @Transactional
     public Url saveShortUrl(String originalUrl) throws InvalidAlgorithmParameterException, NoSuchPaddingException, UnsupportedEncodingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         String encryptedBase62 = toBase62(createEncryptedUrl(originalUrl));
         StringBuffer stringBuffer = new StringBuffer();
         int idx = 0;
-
         while (true){
-            stringBuffer.append(encryptedBase62.substring(idx, idx + 7));
-            if (tryToSaveShortUrl(String.valueOf(stringBuffer), encryptedBase62))
+            stringBuffer.append(encryptedBase62, idx, idx + 7);
+            log.info("subString = {}", stringBuffer);
+            try{
+                this.repository.save(new Url(encryptedBase62, String.valueOf(stringBuffer)));
                 break;
-            stringBuffer.setLength(0);
-            idx++;
-            if (idx + 7 >= encryptedBase62.length()){
-                throw new RuntimeException("짧은 URL을 생성할 수 없습니다.");
+            }catch (DataIntegrityViolationException e){
+                log.error("duplicated ShortUrl : {}", stringBuffer);
+                idx++;
+                stringBuffer.setLength(0);
             }
         }
-        return new Url(String.valueOf(stringBuffer), encryptedBase62);
+        return new Url(encryptedBase62, String.valueOf(stringBuffer));
     }
 
-    private boolean tryToSaveShortUrl(String shortUrl, String encryptedBase62){
-        try {
-            this.repository.save(new Url(shortUrl, encryptedBase62));
-        }catch (Exception e){
-            return false;
-        }
-        return true;
-    }
+
 
     private String createEncryptedUrl(String originalUrl) throws InvalidAlgorithmParameterException, NoSuchPaddingException, UnsupportedEncodingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         return hash.encrypt(originalUrl);
