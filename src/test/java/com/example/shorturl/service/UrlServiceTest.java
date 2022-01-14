@@ -1,8 +1,10 @@
 package com.example.shorturl.service;
 
 import com.example.shorturl.repository.UrlRepository;
+import com.example.shorturl.service.hashUtils.Hash;
 import com.example.shorturl.url.Url;
 import lombok.extern.slf4j.Slf4j;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -29,6 +31,8 @@ class UrlServiceTest {
     UrlService urlService;
 
     @Autowired
+    Hash hash;
+    @Autowired
     UrlRepository urlRepository;
     /**
      *
@@ -44,16 +48,45 @@ class UrlServiceTest {
      */
     @Test
     @Transactional
-    void saveShortUrl() throws InvalidAlgorithmParameterException, NoSuchPaddingException, UnsupportedEncodingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException, DataIntegrityViolationException {
+    void saveSameOriginalUrl() throws InvalidAlgorithmParameterException, NoSuchPaddingException, UnsupportedEncodingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException, DataIntegrityViolationException {
         String originalUrl = "www.naver.com";
         Url savedUrl = urlService.saveShortUrl(originalUrl);
         Url savedUrl2 = urlService.saveShortUrl(originalUrl);
+        log.info("savedUrl shortUrl : {} , id {}", savedUrl.getShortUrl(), savedUrl.getId());
+        log.info("savedUrl2 shortUrl : {}, id {}", savedUrl2.getShortUrl(), savedUrl2.getId());
+        Assertions.assertThat(savedUrl.getShortUrl()).isEqualTo(savedUrl2.getShortUrl());
+    }
 
-        Optional<Url> findUrl = this.urlRepository.findById(1L);
-        log.info("findUrl {} {}", findUrl.get().getUrl(), findUrl.get().getId());
-        log.info("savedUrl2 Id {}", savedUrl2.getId());
-        assertThat(savedUrl.getUrl()).isEqualTo(savedUrl2.getUrl());
-        assertThat(savedUrl.getShortUrl()).isNotEqualTo(savedUrl2.getShortUrl());
+    @Test
+    @Transactional
+    void saveDifferentOriginalUrl() throws InvalidAlgorithmParameterException, NoSuchPaddingException, UnsupportedEncodingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+        String originalUrl = "www.naver.com";
+        String originalUrl1 = "www.naver1.com";
+        Url savedUrl = urlService.saveShortUrl(originalUrl);
+        Url savedUrl1 = urlService.saveShortUrl(originalUrl1);
+        log.info("savedUrl shortUrl : {} , id {}", savedUrl.getShortUrl(), savedUrl.getId());
+        log.info("savedUrl2 shortUrl : {}, id {}", savedUrl1.getShortUrl(), savedUrl1.getId());
+        Assertions.assertThat(savedUrl.getShortUrl()).isNotEqualTo(savedUrl1.getShortUrl());
+    }
+    /**
+     * url 저장 후 불러와서 리다렉션 되는지.
+     * @throws InvalidAlgorithmParameterException
+     * @throws NoSuchPaddingException
+     * @throws UnsupportedEncodingException
+     * @throws IllegalBlockSizeException
+     * @throws NoSuchAlgorithmException
+     * @throws BadPaddingException
+     * @throws InvalidKeyException
+     */
+    @Test
+    @Transactional
+    void findShortUrl() throws InvalidAlgorithmParameterException, NoSuchPaddingException, UnsupportedEncodingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+        String originalUrl = "www.naver.com";
+        Url savedUrl = urlService.saveShortUrl(originalUrl);
+        log.info("savedUrl = {}", savedUrl.getShortUrl());
+        String findoriginalUrl = urlService.findUrl2(savedUrl.getShortUrl());
+
 
     }
+
 }

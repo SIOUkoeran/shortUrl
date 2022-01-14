@@ -1,5 +1,7 @@
 package com.example.shorturl.service;
 
+import com.example.shorturl.exception.UrlException;
+import com.example.shorturl.service.decode.Decoder;
 import com.example.shorturl.service.encode.Encoder;
 import com.example.shorturl.service.hashUtils.Hash;
 import com.example.shorturl.url.Url;
@@ -22,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+import javax.persistence.EntityNotFoundException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
@@ -40,6 +43,7 @@ public class UrlService {
     private final UrlEncoder encoder;
     private final Hash hash;
     private final Encoder encode;
+    private final Decoder decoder;
 
     @Transactional
     public Url saveUrl(RequestUrlForm form){
@@ -57,15 +61,37 @@ public class UrlService {
         return this.repository.save(new Url(form.getUrl(),String.valueOf(encoded)));
     }
 
+    @Transactional(readOnly = true)
     public Optional<Url> findUrl(String url){
-
         log.info("find url = {}", url);
         return this.repository.findByShortUrl(url);
+    }
+
+    public Url findUrlThrow(String url){
+        log.info("find url = {}", url);
+        return this.repository.findByShortUrl(url)
+                .orElseThrow(() -> new IllegalArgumentException("잘못된 url 요청"));
+    }
+
+    @Transactional(readOnly = true)
+    public String findUrl2(String shortUrl) throws InvalidAlgorithmParameterException, UnsupportedEncodingException, IllegalBlockSizeException, NoSuchPaddingException, BadPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        log.info("find url = {}", shortUrl);
+        Url url = this.repository.findByShortUrl(shortUrl)
+                .orElseThrow(UrlException::new);
+        BigInteger encryptedUrl = decoder.base62(url.getUrl());
+        String encrypted =  encryptedUrl.toString(16);
+        log.info("toHex {}", encrypted);
+        String originalUrl = hash.decrypt(encrypted);
+        log.info("originalUrl {}", originalUrl);
+        return originalUrl;
     }
 
     @Transactional
     public Url saveShortUrl(String originalUrl) throws InvalidAlgorithmParameterException, NoSuchPaddingException, UnsupportedEncodingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         String encryptedBase62 = toBase62(createEncryptedUrl(originalUrl));
+        Optional<Url>  findUrl = this.repository.findByUrl(encryptedBase62);
+        if (findUrl.isPresent())
+            return findUrl.get();
         StringBuffer stringBuffer = new StringBuffer();
         int idx = 0;
         Url url;
@@ -73,24 +99,23 @@ public class UrlService {
             stringBuffer.append(encryptedBase62, idx, idx + 7);
             log.info("subString = {}", stringBuffer);
             try{
-                url = this.repository.save(new Url(encryptedBase62, String.valueOf(stringBuffer)));
-                break;
+                return this.repository.save(new Url(encryptedBase62, String.valueOf(stringBuffer)));
             }catch (DataIntegrityViolationException e){
                 log.error("duplicated ShortUrl : {}", stringBuffer);
                 idx++;
                 stringBuffer.setLength(0);
             }
         }
-        return url;
     }
-
-
 
     private String createEncryptedUrl(String originalUrl) throws InvalidAlgorithmParameterException, NoSuchPaddingException, UnsupportedEncodingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         return hash.encrypt(originalUrl);
     }
     private String toBase62(String input){
         return encode.base62(new BigInteger(input, 16));
+    }
+    private String decrpytUrl(String encrypted) throws InvalidAlgorithmParameterException, UnsupportedEncodingException, IllegalBlockSizeException, NoSuchPaddingException, BadPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        return hash.decrypt(encrypted);
     }
 
 }

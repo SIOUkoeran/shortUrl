@@ -1,6 +1,5 @@
 package com.example.shorturl.service.encode;
 
-import com.example.shorturl.service.hashUtils.Hash;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -10,9 +9,9 @@ import java.math.BigInteger;
 @RequiredArgsConstructor
 @Component
 @Slf4j
-public class Base62 implements Encoder{
+public class Base62Encoder implements Encoder{
 
-    private final String base62 = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    private final String base62 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
     @Override
     public String base62(BigInteger value) {

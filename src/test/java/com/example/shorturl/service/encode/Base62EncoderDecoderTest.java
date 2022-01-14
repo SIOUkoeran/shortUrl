@@ -3,7 +3,6 @@ package com.example.shorturl.service.encode;
 import com.example.shorturl.service.hashUtils.AES;
 import com.example.shorturl.service.hashUtils.Hash;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import javax.crypto.BadPaddingException;
@@ -16,14 +15,13 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
-class Base62Test {
+class Base62EncoderDecoderTest {
 
     @Test
     void toBase62() throws InvalidAlgorithmParameterException, NoSuchPaddingException, UnsupportedEncodingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
-        Encoder base62 = new Base62();
+        Encoder base62 = new Base62Encoder();
         Hash aes = new AES();
         String url = "www.naver.com";
         String encrypted = aes.encrypt(url);
