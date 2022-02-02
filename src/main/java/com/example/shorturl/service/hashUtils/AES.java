@@ -41,8 +41,6 @@ public class AES implements Hash{
         cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, ivParameterSpec);
 
         byte[] encrypted = cipher.doFinal(originalUrl.getBytes("UTF-8"));
-
-        log.info("encrypted {}", encrypted.toString());
         byte[] result = Base64.encodeBase64(encrypted);
         return toHex(result);
     }
@@ -69,11 +67,20 @@ public class AES implements Hash{
         SecretKeySpec secretKeySpec = createKeySpec(key, "AES");
         IvParameterSpec ivParameterSpec = createIvParameterSpec(iv);
         cipher.init(Cipher.DECRYPT_MODE, secretKeySpec, ivParameterSpec);
-
-        byte[] decrypted = cipher.doFinal(Base64.decodeBase64(hash));
+        byte[] encodedBytes = toBytes(hash);
+        byte[] decrypted = cipher.doFinal(Base64.decodeBase64(encodedBytes));
         return new String(decrypted, "UTF-8");
     }
 
+    private byte[] toBytes(String encoded){
+        if (encoded == null || encoded.length() == 0) { return null; }
+        byte[] ba = new byte[encoded.length() / 2];
+        for (int i = 0; i < ba.length; i++) {
+            ba[i] = (byte) (Integer.parseInt(encoded.substring(2 * i, 2 * i + 2), 16));
+        }
+        return ba;
+
+    }
     private SecretKeySpec createKeySpec(String key, String algorithm) throws UnsupportedEncodingException {
         return new SecretKeySpec(key.getBytes("UTF-8"), algorithm);
     }

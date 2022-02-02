@@ -80,8 +80,8 @@ public class UrlService {
         Url url = this.repository.findByShortUrl(shortUrl)
                 .orElseThrow(UrlException::new);
         BigInteger encryptedUrl = decoder.base62(url.getUrl());
-        String encrypted =  encryptedUrl.toString();
-        log.info("복호화 10진수 : {}", encrypted);
+        String encrypted =  encryptedUrl.toString(16);
+        log.info("복호화 16진수 : {}", encrypted);
         String originalUrl = hash.decrypt(encrypted);
         log.info("originalUrl {}", originalUrl);
         return originalUrl;
@@ -113,8 +113,9 @@ public class UrlService {
         return hash.encrypt(originalUrl);
     }
     private String toBase62(String input){
+
         BigInteger bigInteger = new BigInteger(input, 16) ;
-        log.info("10진수 : {}", bigInteger);
+        log.info("16 진수  {} ---> 10진수 : {}" ,input,  bigInteger);
         return encode.base62(bigInteger);
     }
     private String decrpytUrl(String encrypted) throws InvalidAlgorithmParameterException, UnsupportedEncodingException, IllegalBlockSizeException, NoSuchPaddingException, BadPaddingException, NoSuchAlgorithmException, InvalidKeyException {
