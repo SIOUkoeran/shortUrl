@@ -1,0 +1,10 @@
+|===
+|Relation|Description
+
+|`+self+`
+|self link
+
+|`+response-url+`
+|redirect-url
+
+|===

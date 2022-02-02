@@ -1,0 +1,12 @@
+|===
+|Path|Type|Description
+
+|`+shortUrl+`
+|`+String+`
+|savedUrl
+
+|`+url+`
+|`+String+`
+|original Url
+
+|===

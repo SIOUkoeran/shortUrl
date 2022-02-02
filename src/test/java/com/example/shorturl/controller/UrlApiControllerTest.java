@@ -4,8 +4,10 @@ import com.example.shorturl.RestDocsConfiguration;
 import com.example.shorturl.form.RequestUrlForm;
 import com.example.shorturl.repository.UrlRepository;
 import com.example.shorturl.service.UrlService;
+import com.example.shorturl.url.Url;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
@@ -17,6 +19,14 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import java.io.UnsupportedEncodingException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 
 import static org.springframework.restdocs.headers.HeaderDocumentation.*;
 import static org.springframework.restdocs.hypermedia.HypermediaDocumentation.linkWithRel;
@@ -136,5 +146,53 @@ class UrlApiControllerTest {
                 );
     }
 
+    @Test
+    @DisplayName("엄호화 적용 url 저장")
+    public void SaveUrl() throws Exception{
+        RequestUrlForm requestUrlForm = new RequestUrlForm();
+        requestUrlForm.setUrl("https://www.naver.com");
+
+        mockMvc.perform(post("/")
+                .accept(MediaTypes.HAL_JSON_VALUE)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(objectMapper.writeValueAsString(requestUrlForm)))
+                .andDo(print())
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("shortUrl").exists())
+                .andExpect(jsonPath("url").exists())
+                .andDo(document("create-encrypted-url",
+                        links(
+                                linkWithRel("self").description("self link"),
+                                linkWithRel("response-url").description("redirect-url")
+                        ),
+                        requestHeaders(
+                                headerWithName(HttpHeaders.CONTENT_TYPE).description("contentHeader")
+                        ),
+                        responseHeaders(
+                                headerWithName(HttpHeaders.CONTENT_TYPE).description("contentHeader")
+                        ),
+                        requestFields(
+                                fieldWithPath("url").description("request Original Url")
+                        ),
+                        relaxedResponseFields(
+                                fieldWithPath("shortUrl").description("savedUrl"),
+                                fieldWithPath("url").description("original Url")
+                        ))
+                )
+        ;
+    }
+
+    @Test
+    @DisplayName("Url 리다렉션")
+    void redirectUrl() throws Exception {
+        RequestUrlForm requestUrlForm = new RequestUrlForm();
+        requestUrlForm.setUrl("https://www.naver.com");
+        Url url = this.urlService.saveShortUrl(requestUrlForm.getUrl());
+        this.mockMvc.perform(get("/{shortUrl}", url.getShortUrl())
+                        .accept(MediaTypes.HAL_JSON_VALUE)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().is3xxRedirection());
+
+    }
 
 }

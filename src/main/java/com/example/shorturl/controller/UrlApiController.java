@@ -15,19 +15,26 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.springframework.hateoas.MediaTypes;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
 @RestController
-@RequestMapping(value = "/bit.ly", produces = MediaTypes.HAL_JSON_VALUE)
+@RequestMapping(produces = MediaTypes.HAL_JSON_VALUE)
 @Slf4j
 public class UrlApiController {
 
@@ -39,14 +46,14 @@ public class UrlApiController {
         this.urlService = urlService;
     }
 
-    @PostMapping()
-    public ResponseEntity requestUrl(@RequestBody @Valid RequestUrlForm form, BindingResult bindingResult){
+    @PostMapping("/")
+    public ResponseEntity requestUrl(@RequestBody @Valid RequestUrlForm form, BindingResult bindingResult) throws InvalidAlgorithmParameterException, NoSuchPaddingException, UnsupportedEncodingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
 
         if (bindingResult.hasErrors()) {
             throw new BadRequestException();
         }
 
-        Url url = urlService.saveUrl(form);
+        Url url = urlService.saveShortUrl(form.getUrl());
         ResponseUrlForm responseUrlForm = new ResponseUrlForm(url.getShortUrl(), url.getUrl());
 
         WebMvcLinkBuilder selfLinkBuilder = linkTo(UrlApiController.class).slash(url.getId());
@@ -57,25 +64,17 @@ public class UrlApiController {
         return  ResponseEntity.created(uri).body(urlResource);
     }
 
+
+
     @GetMapping("/{shortUrl}")
-    public void responseUrl(@PathVariable(name = "shortUrl") String url, HttpServletResponse response){
+    public void responseUrl(@PathVariable(name = "shortUrl") String url, HttpServletResponse response) throws InvalidAlgorithmParameterException, UnsupportedEncodingException, IllegalBlockSizeException, NoSuchPaddingException, BadPaddingException, NoSuchAlgorithmException, InvalidKeyException {
 
-        Optional<Url> optionalUrl = urlService.findUrl(url);
-
-        if (optionalUrl.isEmpty()) {
-            throw new UrlException();
-        }
-
-        Url findUrl = optionalUrl.get();
-
+        String findUrl = urlService.findUrl2(url);
         try {
-            response.sendRedirect(findUrl.getUrl());
+            response.sendRedirect(findUrl);
         } catch (IOException e) {
             throw new BadRequestException();
         }
     }
-
-
-
 
 }
