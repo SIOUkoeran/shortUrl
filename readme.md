@@ -5,10 +5,11 @@ DB
 
 ---
 </br>
-input -> Url -> 암호화 -> BASE62 -> 저장 
+input -> Url -> 암호화 -> BASE62 -> 저장
+</br>
 DB -> BASE62 -> 복호화 -> originalUrl
 </br>
-
+---
 <body class="book toc2 toc-left">
 <div id="header">
 <h1>API Guide</h1>
