@@ -3,6 +3,12 @@ DB
 </br>
 <img width = "40%" src ="https://user-images.githubusercontent.com/35398494/141236043-dc8c7a7c-0534-4bc7-b8a1-704e90e78e8c.png"/>
 
+---
+</br>
+input -> Url -> 암호화 -> BASE62 -> 저장 
+DB -> BASE62 -> 복호화 -> originalUrl
+</br>
+
 <body class="book toc2 toc-left">
 <div id="header">
 <h1>API Guide</h1>
