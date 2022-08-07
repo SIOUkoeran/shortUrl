@@ -1,6 +1,0 @@
-[source,options="nowrap"]
-----
-{
-  "url" : "https://www.naver.com"
-}
-----

@@ -7,4 +7,5 @@ import java.math.BigInteger;
 @Component
 public interface Encoder {
     public String base62(BigInteger value);
+    public String base62(long value);
 }

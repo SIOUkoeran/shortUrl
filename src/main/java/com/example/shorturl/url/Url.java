@@ -4,12 +4,13 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.net.URL;
 
 @Entity
 @Getter @Setter
 public class Url {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
     private Long id;
 
     private String url;
@@ -23,5 +24,20 @@ public class Url {
     }
 
     protected Url() {
+    }
+
+    public Url(Long id, String url, String shortUrl){
+        this.id = id;
+        this.url = url;
+        this.shortUrl = shortUrl;
+    }
+
+    @Override
+    public String toString() {
+        return "Url{" +
+                "id=" + id +
+                ", url='" + url + '\'' +
+                ", shortUrl='" + shortUrl + '\'' +
+                '}';
     }
 }

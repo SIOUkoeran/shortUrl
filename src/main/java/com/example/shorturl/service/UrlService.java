@@ -1,6 +1,9 @@
 package com.example.shorturl.service;
 
+import com.example.shorturl.exception.ErrorCode;
 import com.example.shorturl.exception.UrlException;
+import com.example.shorturl.exception.UrlNotFoundException;
+import com.example.shorturl.idgenerator.IdGenerator;
 import com.example.shorturl.service.decode.Decoder;
 import com.example.shorturl.service.encode.Encoder;
 import com.example.shorturl.service.hashUtils.Hash;
@@ -10,14 +13,10 @@ import com.example.shorturl.repository.UrlRepository;
 import com.example.shorturl.service.encode.UrlEncoder;
 import com.example.shorturl.form.RequestUrlForm;
 
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.exception.ConstraintViolationException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 
@@ -45,6 +44,7 @@ public class UrlService {
     private final Hash hash;
     private final Encoder encode;
     private final Decoder decoder;
+    private final IdGenerator idGenerator;
 
     @Transactional
     public Url saveUrl(RequestUrlForm form){
@@ -120,6 +120,24 @@ public class UrlService {
     }
     private String decrpytUrl(String encrypted) throws InvalidAlgorithmParameterException, UnsupportedEncodingException, IllegalBlockSizeException, NoSuchPaddingException, BadPaddingException, NoSuchAlgorithmException, InvalidKeyException {
         return hash.decrypt(encrypted);
+    }
+
+    public Url saveShortUrlV3(String longUrl){
+        long id = idGenerator.generateRandomId();
+        String shortUrl = encode.base62(id);
+        Url url = new Url(id, longUrl, shortUrl);
+        log.info("success saving url {}", url.toString());
+        return this.repository.save(url);
+    }
+
+    @Transactional(readOnly = true)
+    public Url findUrlByShortUrlV3(String shortUrl){
+        long l = decoder.convertToLong(shortUrl);
+        log.info("result decode {}", l);
+        Url findUrl = this.repository.findById(l)
+                .orElseThrow(() -> new UrlNotFoundException(ErrorCode.URL_NOT_FOUND));
+        log.info("success finding url {}", findUrl);
+        return findUrl;
     }
 
 }

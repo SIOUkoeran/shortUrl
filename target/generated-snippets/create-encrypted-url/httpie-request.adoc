@@ -1,8 +1,0 @@
-[source,bash]
-----
-$ echo '{
-  "url" : "https://www.naver.com"
-}' | http POST 'http://localhost:8080/' \
-    'Content-Type:application/json;charset=UTF-8' \
-    'Accept:application/hal+json'
-----

@@ -20,7 +20,19 @@ public class Base62Encoder implements Encoder{
             stringBuffer.append(base62.charAt(value.mod(BigInteger.valueOf(62)).intValue()));
             value = value.divide(BigInteger.valueOf(62));
         }
-        log.info("to base62 {}", stringBuffer.toString());
-        return stringBuffer.toString();
+        log.info("result base62 {}", stringBuffer);
+        return String.valueOf(stringBuffer);
+    }
+
+    @Override
+    public String base62(long value) {
+        log.info("request converting base62 {}", value);
+        StringBuffer stringBuffer = new StringBuffer();
+        while (value > 0){
+            stringBuffer.append(base62.charAt((int) (value % 62)));
+            value = value / 62;
+        }
+        log.info("result base62 {}", stringBuffer);
+        return String.valueOf(stringBuffer);
     }
 }

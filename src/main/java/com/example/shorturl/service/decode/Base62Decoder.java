@@ -4,10 +4,11 @@ package com.example.shorturl.service.decode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
 
-@Component
+@Service
 @Slf4j
 @RequiredArgsConstructor
 public class Base62Decoder implements Decoder{
@@ -25,19 +26,15 @@ public class Base62Decoder implements Decoder{
         }
         return sum;
     }
-//    public BigInteger base62(String value) {
-//        BigInteger result = BigInteger.ZERO;
-//        int power = 1;
-//        int idx;
-//        if (value == null)
-//            throw new IllegalArgumentException("String is null");
-//        for (int i = 0; i < value.length(); i++) {
-//            idx = base62.indexOf(value.charAt(i));
-//            result = result.add(BigInteger.valueOf(idx).multiply(BigInteger.valueOf(62).pow(power)));
-//            log.info("result ::: {}", result);
-//            power *= radix;
-//        }
-//        log.info("Big Integer value{}" , result);
-//        return result;
-//    }
+
+    @Override
+    public long convertToLong(String param){
+        long sum = 0;
+        long pow = 1;
+        for (int i = 0; i < param.length(); i++) {
+            sum +=  base62.indexOf(param.charAt(i)) * pow;
+            pow *= radix;
+        }
+        return sum;
+    }
 }
