@@ -4,10 +4,11 @@ MYSQL
 
 ---
 </br>
-input -> Url -> 암호화 -> BASE62 -> 저장
+input --> ID Generator --> BASE62 --> DB
 </br>
-DB -> BASE62 -> 복호화 -> originalUrl
+DB --> BASE62(Decode) --> originalUrl
 </br>
+
 ---
 <body class="book toc2 toc-left">
 <div id="header">
