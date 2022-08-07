@@ -66,7 +66,7 @@ class UrlApiControllerTest {
         RequestUrlForm requestUrlForm = new RequestUrlForm();
         requestUrlForm.setUrl("https://www.naver.com");
 
-        mockMvc.perform(post("/bit.ly/")
+        mockMvc.perform(post("/v3/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaTypes.HAL_JSON)
                 .content(objectMapper.writeValueAsString(requestUrlForm)))
@@ -98,19 +98,19 @@ class UrlApiControllerTest {
     @Test
     public void responseUrl() throws Exception{
 
-        this.mockMvc.perform(get("/bit.ly/notFound"))
+        this.mockMvc.perform(get("/v3/notFound"))
                 .andDo(print())
                 .andExpect(jsonPath("code").exists())
                 .andExpect(jsonPath("message").exists())
-                .andExpect(status().isNotFound())
+                .andExpect(status().isBadRequest())
                 .andDo(document("error-notFound",
                         links(
-                                linkWithRel("request-url").description("request-url")
+                                linkWithRel("request-create-short url").description("retry-creating-url")
                         ),
                         responseFields(
                                 fieldWithPath("code").description("error code"),
                                 fieldWithPath("message").description("error message"),
-                                fieldWithPath("_links.request-url.href").description("return request url")
+                                fieldWithPath("_links.request-create-short url.href").description("retry-creating-url")
                         ),
                         responseHeaders(
                                 headerWithName(HttpHeaders.CONTENT_TYPE).description("content type header")
@@ -123,7 +123,7 @@ class UrlApiControllerTest {
         RequestUrlForm requestUrlForm = new RequestUrlForm();
         requestUrlForm.setUrl("www.naver.com");
 
-        mockMvc.perform(post("/bit.ly")
+        mockMvc.perform(post("/v3/")
                         .accept(MediaTypes.HAL_JSON_VALUE)
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content(objectMapper.writeValueAsString(requestUrlForm)))
@@ -152,7 +152,7 @@ class UrlApiControllerTest {
         RequestUrlForm requestUrlForm = new RequestUrlForm();
         requestUrlForm.setUrl("https://www.naver.com");
 
-        mockMvc.perform(post("/")
+        mockMvc.perform(post("/v3/")
                 .accept(MediaTypes.HAL_JSON_VALUE)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .content(objectMapper.writeValueAsString(requestUrlForm)))
@@ -187,8 +187,8 @@ class UrlApiControllerTest {
     void redirectUrl() throws Exception {
         RequestUrlForm requestUrlForm = new RequestUrlForm();
         requestUrlForm.setUrl("https://www.naver.com");
-        Url url = this.urlService.saveShortUrl(requestUrlForm.getUrl());
-        this.mockMvc.perform(get("/{shortUrl}", url.getShortUrl())
+        Url url = this.urlService.saveShortUrlV3(requestUrlForm.getUrl());
+        this.mockMvc.perform(get("/v3/{shortUrl}", url.getShortUrl())
                         .accept(MediaTypes.HAL_JSON_VALUE)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is3xxRedirection());
