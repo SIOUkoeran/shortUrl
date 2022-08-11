@@ -73,7 +73,7 @@ DB --> BASE62(Decode) --> originalUrl
 <h3 id="_주소_생성_curl_request"><a class="anchor" href="#_주소_생성_curl_request"></a><a class="link" href="#_주소_생성_curl_request">2.2. Curl request</a></h3>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://localhost:8080/bit.ly/' -i -X POST \
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl 'http://localhost:8080/' -i -X POST \
     -H 'Content-Type: application/json;charset=UTF-8' \
     -H 'Accept: application/hal+json' \
     -d '{
@@ -86,7 +86,7 @@ DB --> BASE62(Decode) --> originalUrl
 <h3 id="_주소_생성_http_request"><a class="anchor" href="#_주소_생성_http_request"></a><a class="link" href="#_주소_생성_http_request">2.3. HTTP request</a></h3>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">POST /bit.ly/ HTTP/1.1
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">POST / HTTP/1.1
 Content-Type: application/json;charset=UTF-8
 Accept: application/hal+json
 Content-Length: 39
@@ -124,7 +124,7 @@ Host: localhost:8080
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">HTTP/1.1 201 Created
-Location: http://localhost:8080/bit.ly/1
+Location: http://localhost:8080/1
 Content-Type: application/hal+json
 Content-Length: 247
 
@@ -133,10 +133,10 @@ Content-Length: 247
   "url" : "https://www.naver.com",
   "_links" : {
     "self" : {
-      "href" : "http://localhost:8080/bit.ly"
+      "href" : "http://localhost:8080"
     },
     "response-url" : {
-      "href" : "http://localhost:8080/bit.ly/9e4cfae4"
+      "href" : "http://localhost:8080/9e4cfae4"
     }
   }
 }</code></pre>
@@ -226,7 +226,7 @@ Content-Length: 247
 <h4 id="_잘못된_url형식_요청_http_request"><a class="anchor" href="#_잘못된_url형식_요청_http_request"></a><a class="link" href="#_잘못된_url형식_요청_http_request">4.1.1. HTTP request</a></h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">POST /bit.ly HTTP/1.1
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">POST / HTTP/1.1
 Content-Type: application/json;charset=UTF-8
 Accept: application/hal+json
 Content-Length: 31
@@ -285,7 +285,7 @@ Content-Length: 182
   "message" : "URL형식을 다시 확인해주세요",
   "_links" : {
     "request-url" : {
-      "href" : "http://localhost:8080/bit.ly"
+      "href" : "http://localhost:8080/"
     }
   }
 }</code></pre>
@@ -320,7 +320,7 @@ Content-Length: 182
 <h4 id="_존재하지않는_url_요청_http_request"><a class="anchor" href="#_존재하지않는_url_요청_http_request"></a><a class="link" href="#_존재하지않는_url_요청_http_request">4.2.1. HTTP request</a></h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">GET /bit.ly/notFound HTTP/1.1
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">GET /notFound HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
@@ -372,7 +372,7 @@ Content-Length: 180
   "message" : "URL을 찾지 못했습니다.",
   "_links" : {
     "request-url" : {
-      "href" : "http://localhost:8080/bit.ly"
+      "href" : "http://localhost:8080/"
     }
   }
 }</code></pre>
@@ -406,7 +406,6 @@ Content-Length: 180
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2021-11-09 21:04:57 +0900
 </div>
 </div>
 
