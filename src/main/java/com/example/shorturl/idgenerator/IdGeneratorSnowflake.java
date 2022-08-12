@@ -13,13 +13,13 @@ import java.util.concurrent.locks.ReentrantLock;
 @Slf4j
 public class IdGeneratorSnowflake implements IdGenerator{
 
-    private static final long sequenceBits = 12L;
+    private static final long sequenceBits = 13L;
     private static final long sequenceMask = ~(-1L << sequenceBits);
     private static final ReentrantLock lock = new ReentrantLock();
     private static final long timestampBits = 41L;
     private static final long datacenterIdBits = 5L;
-    private static final long generatorBits = 10L;
-    private static final long  generatorId = 0L;
+    private static final long generatorBits = 5L;
+    private static final long  generatorId = 1L;
     private static final long shiftTime = datacenterIdBits + sequenceBits;
     private static final long maskTime = timestampBits;
 
@@ -39,19 +39,24 @@ public class IdGeneratorSnowflake implements IdGenerator{
             throw new IllegalTickStateException(ErrorCode.IllegalTickState);
         }
 
-        log.info("timestamp {} : lastTimeStamp {}", timeStamp, lastTimeStamp);
+        try {
+            lock.lockInterruptibly();
 
-        if (timeStamp < lastTimeStamp){
-            throw new IllegalTimeStampStateException(ErrorCode.IllegalTimestampState);
+            if (timeStamp < lastTimeStamp) {
+                throw new IllegalTimeStampStateException(ErrorCode.IllegalTimestampState);
+            }
+            log.info("timestamp {} : lastTimeStamp {}", timeStamp, lastTimeStamp);
+            if (timeStamp == lastTimeStamp) {
+                sequence = (sequenceBits + 1) & sequenceMask;
+            } else {
+                sequence = 0L;
+            }
+            lastTimeStamp = timeStamp;
+        } catch (InterruptedException e){
+            log.error("interrupted Exception ", e);
+        } finally {
+           lock.unlock();
         }
-        lock.lock();
-        if (timeStamp == lastTimeStamp){
-            sequence = (sequenceBits + 1) & sequenceMask;
-        } else {
-            sequence = 0L;
-        }
-        lastTimeStamp = timeStamp;
-        lock.unlock();
         return (timeStamp << shiftTime) | (datacenterIdBits << datacenterIdBits) | (generatorId << generatorBits) | sequence;
     }
 
